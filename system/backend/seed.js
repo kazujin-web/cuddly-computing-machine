@@ -47,6 +47,21 @@ const runInserts = () => {
             id: 'u-admin', name: 'System Admin', email: 'admin@gmail.com', role: 'ADMIN', 
             password: '123', avatar: '', phone: '09170000000', address: 'Admin Office',
             academicHistory: '', requirements: ''
+        },
+        { 
+            id: 'u-tea-default', name: 'Default Teacher', email: 'teacher@gmail.com', role: 'TEACHER', 
+            password: '123', avatar: '', assignedSections: '["Sampaguita", "Narra"]', advisorySection: 'Narra', phone: '09171111111',
+            academicHistory: '', requirements: ''
+        },
+        { 
+            id: 'u-stu-default', name: 'Default Student', email: 'student@gmail.com', role: 'STUDENT', 
+            password: '123', lrn: '123456789000', gradeLevel: 'Grade 4', section: 'Narra',
+            attendanceRate: 98.5, gwa: 92.5, honorStatus: 'With High Honors', is4Ps: true,
+            phone: '09172222222', address: 'Brgy. Santo Niño, Marikina City', 
+            guardianName: 'Maria Dela Cruz', guardianPhone: '09173333333', psaStatus: 'Verified',
+            feedingProgramStatus: 'None',
+            academicHistory: JSON.stringify([{ year: '2023-2024', grade: 'Grade 3', school: 'Sto. Niño Elementary' }]),
+            requirements: JSON.stringify({ 'SF9': true })
         }
     ];
 
