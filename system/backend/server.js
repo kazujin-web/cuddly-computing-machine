@@ -205,6 +205,11 @@ app.post('/api/login', (req, res) => {
     db.get('SELECT * FROM users WHERE email = ? OR id = ?', [email, email], (err, user) => {
         if (err) return res.status(500).json({ message: "Error" });
         if (!user || user.password !== password) return res.status(401).json({ message: "Invalid credentials" });
+        
+        if (user.status === 'dropped') {
+            return res.status(403).json({ message: "Account is dropped. Please re-apply for admission." });
+        }
+
         const { password: _, ...u } = user;
         logActivity(user.id, user.name, "User Logged In", "Auth");
         res.json(u);
@@ -657,10 +662,25 @@ app.post('/api/dropouts', (req, res) => {
 });
 app.put('/api/dropouts/:id', (req, res) => {
     const { status } = req.body;
-    db.run('UPDATE dropout_requests SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
-        if (err) return res.status(500).json({ message: "Error" });
-        logActivity("Admin", "Registrar", `Updated Dropout Request ${req.params.id}`, "Admissions");
-        res.json({ message: "Updated" });
+    const { id } = req.params;
+
+    db.get('SELECT * FROM dropout_requests WHERE id = ?', [id], (err, request) => {
+        if (err || !request) return res.status(404).json({ message: "Request not found" });
+
+        db.run('UPDATE dropout_requests SET status = ? WHERE id = ?', [status, id], (err) => {
+            if (err) return res.status(500).json({ message: "Error updating request" });
+            
+            if (status === 'approved') {
+                db.run('UPDATE users SET status = ? WHERE id = ?', ['dropped', request.studentId], (err) => {
+                    if (err) console.error("Failed to update user status:", err);
+                    logActivity("Admin", "Registrar", `Approved Dropout for ${request.studentName}`, "Admissions");
+                });
+            } else {
+                logActivity("Admin", "Registrar", `Updated Dropout Request ${id} to ${status}`, "Admissions");
+            }
+            
+            res.json({ message: "Updated" });
+        });
     });
 });
 
@@ -748,8 +768,33 @@ app.put('/api/enrollment/:id', (req, res) => {
             if (err || !app) return res.status(404).json({ message: "Application not found" });
 
             // Check if user already exists
-            db.get('SELECT id FROM users WHERE email = ?', [app.email], (err, existingUser) => {
-                if (existingUser) return res.status(400).json({ message: "User with this email already exists" });
+            db.get('SELECT * FROM users WHERE email = ?', [app.email], (err, existingUser) => {
+                if (existingUser) {
+                    if (existingUser.status === 'dropped') {
+                        // Reactivate user
+                        db.run(`UPDATE users SET 
+                            status = 'active', 
+                            gradeLevel = ?, 
+                            section = ?, 
+                            guardianName = ?, 
+                            guardianPhone = ?,
+                            role = 'STUDENT'
+                            WHERE id = ?`, 
+                            [app.targetGrade, 'TBD', app.parentName, app.parentContact, existingUser.id],
+                            (err) => {
+                                if (err) return res.status(500).json({ message: "Error reactivating user" });
+                                
+                                db.run('UPDATE enrollment_applications SET status = ? WHERE id = ?', [status, id], (err) => {
+                                    if (err) return res.status(500).json({ message: "Error updating app status" });
+                                    logActivity("Admin", "Registrar", `Re-admitted User ${existingUser.name}`, "Admissions");
+                                    res.json({ message: "User re-admitted successfully" });
+                                });
+                            }
+                        );
+                        return;
+                    }
+                    return res.status(400).json({ message: "User with this email already exists" });
+                }
 
                 // Generate Password and LRN
                 const generatedPassword = Math.random().toString(36).slice(-8);
