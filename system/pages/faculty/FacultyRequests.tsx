@@ -10,6 +10,7 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'dropout' | 'enrollment' | 'documents'>('enrollment');
+  const [sortOption, setSortOption] = useState('newest');
 
   const load = async () => {
     setLoading(true);
@@ -29,6 +30,34 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const getSortedData = (data: any[], type: 'enrollment' | 'document' | 'dropout') => {
+      return [...data].sort((a, b) => {
+          const nameA = type === 'enrollment' ? a.fullName : a.studentName;
+          const nameB = type === 'enrollment' ? b.fullName : b.studentName;
+          
+          let dateA = 0, dateB = 0;
+          if (type === 'enrollment') {
+             dateA = new Date(a.dateApplied).getTime();
+             dateB = new Date(b.dateApplied).getTime();
+          } else if (type === 'document') {
+             dateA = new Date(a.dateRequested).getTime();
+             dateB = new Date(b.dateRequested).getTime();
+          } else {
+             dateA = new Date(a.timestamp).getTime();
+             dateB = new Date(b.timestamp).getTime();
+          }
+
+          switch (sortOption) {
+              case 'newest': return dateB - dateA;
+              case 'oldest': return dateA - dateB;
+              case 'name-az': return nameA.localeCompare(nameB);
+              case 'name-za': return nameB.localeCompare(nameA);
+              case 'status': return a.status.localeCompare(b.status);
+              default: return 0;
+          }
+      });
+  };
 
   const handleApproveAdmission = async (id: string, email: string) => {
     setProcessing(id);
@@ -116,9 +145,22 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Requests Hub</h1>
-        <p className="text-slate-500 mt-2 font-medium">Process admissions, documents, and withdrawal requests for SNES.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Requests Hub</h1>
+          <p className="text-slate-500 mt-2 font-medium">Process admissions, documents, and withdrawal requests for SNES.</p>
+        </div>
+        <select 
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-bold text-xs uppercase tracking-widest text-slate-500 outline-none focus:border-indigo-500 transition-all shadow-sm"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="name-az">Name (A-Z)</option>
+            <option value="name-za">Name (Z-A)</option>
+            <option value="status">Status</option>
+        </select>
       </div>
 
       <div className="flex gap-4 p-1.5 bg-slate-100 dark:bg-slate-900 w-fit rounded-[2rem] flex-wrap">
@@ -144,7 +186,7 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
 
       <div className="grid grid-cols-1 gap-6">
         {activeTab === 'enrollment' && (
-          enrollments.length > 0 ? enrollments.map(app => (
+          enrollments.length > 0 ? getSortedData(enrollments, 'enrollment').map(app => (
             <div key={app.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${app.status !== 'pending' ? 'opacity-50' : ''}`}>
               <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-600 flex-shrink-0">
                 <GraduationCap size={32} />
@@ -203,7 +245,7 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
         )}
 
         {activeTab === 'documents' && (
-          docRequests.length > 0 ? docRequests.map(req => (
+          docRequests.length > 0 ? getSortedData(docRequests, 'document').map(req => (
             <div key={req.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${req.status !== 'pending' ? 'opacity-50' : ''}`}>
               <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 flex-shrink-0">
                 <FileText size={32} />
@@ -253,7 +295,7 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
         )}
 
         {activeTab === 'dropout' && (
-           dropouts.length > 0 ? dropouts.map(req => (
+           dropouts.length > 0 ? getSortedData(dropouts, 'dropout').map(req => (
             <div key={req.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${req.status !== 'pending' ? 'opacity-50' : ''}`}>
               <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center text-rose-600 flex-shrink-0">
                 <ShieldAlert size={32} />

@@ -31,6 +31,7 @@ const UserManagement: React.FC = () => {
     role: UserRole.STUDENT
   });
   const [formError, setFormError] = useState('');
+  const [sortOption, setSortOption] = useState('name-az');
 
   const load = async () => {
     setLoading(true);
@@ -139,7 +140,17 @@ const UserManagement: React.FC = () => {
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => {
+      switch (sortOption) {
+          case 'name-az': return a.name.localeCompare(b.name);
+          case 'name-za': return b.name.localeCompare(a.name);
+          case 'role-az': return a.role.localeCompare(b.role);
+          case 'role-za': return b.role.localeCompare(a.role);
+          case 'email-az': return a.email.localeCompare(b.email);
+          case 'email-za': return b.email.localeCompare(a.email);
+          default: return 0;
+      }
+  });
 
   if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div>;
 
@@ -165,6 +176,18 @@ const UserManagement: React.FC = () => {
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
+          <select 
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-bold text-xs uppercase tracking-widest text-slate-500 outline-none focus:border-indigo-500 transition-all shadow-sm"
+          >
+            <option value="name-az">Name (A-Z)</option>
+            <option value="name-za">Name (Z-A)</option>
+            <option value="role-az">Role (A-Z)</option>
+            <option value="role-za">Role (Z-A)</option>
+            <option value="email-az">Email (A-Z)</option>
+            <option value="email-za">Email (Z-A)</option>
+          </select>
           <button 
             onClick={() => setIsAddingUser(true)}
             className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
