@@ -72,7 +72,6 @@ const AIAssistant: React.FC<{ user: AppUser }> = ({ user }) => {
       className="fixed bottom-8 right-8 w-16 h-16 bg-school-navy dark:bg-school-gold text-white dark:text-school-navy rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[100] group"
     >
       <Sparkles size={28} className="group-hover:rotate-12 transition-transform" />
-      <div className="absolute -top-2 -right-2 bg-rose-500 w-5 h-5 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
     </button>
   );
 
