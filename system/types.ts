@@ -249,7 +249,7 @@ export interface DocumentRequest {
   studentName: string;
   documentType: 'Good Moral' | 'Certificate of Enrollment' | 'Form 137' | 'Diploma Replacement';
   purpose: string;
-  status: 'pending' | 'ready';
+  status: 'pending' | 'ready' | 'rejected' | 'approved';
   dateRequested: string;
 }
 

@@ -239,6 +239,10 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(reqData),
     }),
+    updateDocRequest: (id, status, feedback = '') => fetchData(`/doc-requests/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status, feedback }),
+    }),
 
     // Finance API
     getFinances: (studentId = '') => fetchData(`/finances${studentId ? `?studentId=${studentId}` : ''}`),

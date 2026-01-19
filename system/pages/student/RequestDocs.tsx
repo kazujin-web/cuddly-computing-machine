@@ -110,8 +110,14 @@ const RequestDocs: React.FC<{ user: User }> = ({ user }) => {
             <div key={req.id} className="p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all group">
                <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-4">
-                     <div className={`p-3 rounded-2xl ${req.status === 'ready' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                        {req.status === 'ready' ? <CheckCircle2 size={24} /> : <Clock size={24} />}
+                     <div className={`p-3 rounded-2xl ${
+                        req.status === 'ready' || req.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 
+                        req.status === 'rejected' ? 'bg-rose-50 text-rose-600' :
+                        'bg-amber-50 text-amber-600'
+                     }`}>
+                        {req.status === 'ready' || req.status === 'approved' ? <CheckCircle2 size={24} /> : 
+                         req.status === 'rejected' ? <X size={24} /> :
+                         <Clock size={24} />}
                      </div>
                      <div>
                         <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">{req.documentType}</h3>
@@ -119,9 +125,11 @@ const RequestDocs: React.FC<{ user: User }> = ({ user }) => {
                      </div>
                   </div>
                   <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                    req.status === 'ready' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'
+                    req.status === 'ready' || req.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
+                    req.status === 'rejected' ? 'bg-rose-100 text-rose-700 border-rose-200' :
+                    'bg-amber-100 text-amber-700 border-amber-200'
                   }`}>
-                    {req.status}
+                    {req.status === 'ready' ? 'Ready' : req.status === 'approved' ? 'Approved' : req.status === 'rejected' ? 'Rejected' : req.status}
                   </span>
                </div>
                <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent group-hover:border-slate-100 transition-all">

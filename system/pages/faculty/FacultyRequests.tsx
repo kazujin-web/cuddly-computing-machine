@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { User, DropoutRequest, EnrollmentApplication, UserRole } from '../../types';
-import { api } from '../../src/api'; // Changed from mockApiService
-import { Check, X, ShieldAlert, GraduationCap, User as UserIcon, Clock, Filter, CheckCircle2, Loader2, FileText, Eye } from 'lucide-react';
+import { User, DropoutRequest, EnrollmentApplication, DocumentRequest } from '../../types';
+import { api } from '../../src/api';
+import { Check, X, ShieldAlert, GraduationCap, Loader2, FileText, CheckCircle2 } from 'lucide-react';
 
 const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
   const [dropouts, setDropouts] = useState<DropoutRequest[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentApplication[]>([]);
+  const [docRequests, setDocRequests] = useState<DocumentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'dropout' | 'enrollment'>('enrollment');
+  const [activeTab, setActiveTab] = useState<'dropout' | 'enrollment' | 'documents'>('enrollment');
 
   const load = async () => {
     setLoading(true);
     try {
-      const [d, e] = await Promise.all([
+      const [d, e, docs] = await Promise.all([
         api.getDropoutRequests(),
-        api.getEnrollmentApplications()
+        api.getEnrollmentApplications(),
+        api.getDocRequests()
       ]);
       setDropouts(d);
       setEnrollments(e);
+      setDocRequests(docs);
     } catch (error) {
       console.error("Failed to load requests:", error);
     }
@@ -77,6 +80,34 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
     setProcessing(null);
   };
 
+  const handleApproveDoc = async (id: string) => {
+    const feedback = prompt("Add a message/remarks for approval (optional):") || '';
+    setProcessing(id);
+    try {
+      await api.updateDocRequest(id, 'ready', feedback);
+      load();
+    } catch (error) {
+      console.error("Failed to approve document request:", error);
+      alert("Failed to approve document request.");
+    }
+    setProcessing(null);
+  };
+
+  const handleRejectDoc = async (id: string) => {
+    const feedback = prompt("Reason for rejection (required):");
+    if (!feedback) return;
+
+    setProcessing(id);
+    try {
+      await api.updateDocRequest(id, 'rejected', feedback);
+      load();
+    } catch (error) {
+      console.error("Failed to reject document request:", error);
+      alert("Failed to reject document request.");
+    }
+    setProcessing(null);
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <Loader2 className="animate-spin text-school-navy" size={40} />
@@ -87,15 +118,21 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
     <div className="space-y-10 animate-in fade-in duration-500">
       <div>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Requests Hub</h1>
-        <p className="text-slate-500 mt-2 font-medium">Process admissions and withdrawal requests for SNES.</p>
+        <p className="text-slate-500 mt-2 font-medium">Process admissions, documents, and withdrawal requests for SNES.</p>
       </div>
 
-      <div className="flex gap-4 p-1.5 bg-slate-100 dark:bg-slate-900 w-fit rounded-[2rem]">
+      <div className="flex gap-4 p-1.5 bg-slate-100 dark:bg-slate-900 w-fit rounded-[2rem] flex-wrap">
          <button 
            onClick={() => setActiveTab('enrollment')}
            className={`px-8 py-4 rounded-3xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 ${activeTab === 'enrollment' ? 'bg-white dark:bg-slate-800 text-school-navy dark:text-school-gold shadow-sm' : 'text-slate-400'}`}
          >
            <GraduationCap size={18} /> New Admissions
+         </button>
+         <button 
+           onClick={() => setActiveTab('documents')}
+           className={`px-8 py-4 rounded-3xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 ${activeTab === 'documents' ? 'bg-white dark:bg-slate-800 text-school-navy dark:text-school-gold shadow-sm' : 'text-slate-400'}`}
+         >
+           <FileText size={18} /> Official Documents
          </button>
          <button 
            onClick={() => setActiveTab('dropout')}
@@ -106,7 +143,7 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {activeTab === 'enrollment' ? (
+        {activeTab === 'enrollment' && (
           enrollments.length > 0 ? enrollments.map(app => (
             <div key={app.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${app.status !== 'pending' ? 'opacity-50' : ''}`}>
               <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-600 flex-shrink-0">
@@ -163,7 +200,59 @@ const FacultyRequests: React.FC<{ user: User }> = ({ user }) => {
               </div>
             </div>
           )) : <EmptyState icon={<GraduationCap size={48}/>} label="No admission requests found" />
-        ) : (
+        )}
+
+        {activeTab === 'documents' && (
+          docRequests.length > 0 ? docRequests.map(req => (
+            <div key={req.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${req.status !== 'pending' ? 'opacity-50' : ''}`}>
+              <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 flex-shrink-0">
+                <FileText size={32} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-2">
+                   <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{req.studentName}</h3>
+                   <span className={`px-3 py-1 text-[10px] font-black uppercase rounded-full ${
+                     req.status === 'ready' || req.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 
+                     req.status === 'rejected' ? 'bg-rose-50 text-rose-600' :
+                     'bg-amber-50 text-amber-600'
+                   }`}>
+                     {req.status === 'ready' ? 'Ready for Pickup' : req.status === 'rejected' ? 'Rejected' : req.status}
+                   </span>
+                </div>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-1">{req.documentType}</p>
+                <p className="text-xs text-slate-500 font-medium italic">"{req.purpose}"</p>
+              </div>
+              <div className="flex gap-3">
+                 {req.status === 'pending' ? (
+                    <>
+                      <button 
+                        onClick={() => handleRejectDoc(req.id)}
+                        disabled={!!processing}
+                        className="px-6 py-4 bg-rose-100 text-rose-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-200 transition-all disabled:opacity-50"
+                        title="Reject"
+                      >
+                        <X size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleApproveDoc(req.id)}
+                        disabled={!!processing}
+                        className="px-8 py-4 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-100 dark:shadow-none hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-3"
+                      >
+                        {processing === req.id ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                        Approve Request
+                      </button>
+                    </>
+                 ) : (
+                    <span className={`font-black text-xs uppercase tracking-widest flex items-center gap-2 ${req.status === 'ready' || req.status === 'approved' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <CheckCircle2 size={18} /> {req.status === 'ready' || req.status === 'approved' ? 'Processed' : 'Rejected'}
+                    </span>
+                 )}
+              </div>
+            </div>
+          )) : <EmptyState icon={<FileText size={48}/>} label="No document requests found" />
+        )}
+
+        {activeTab === 'dropout' && (
            dropouts.length > 0 ? dropouts.map(req => (
             <div key={req.id} className={`p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-sm flex flex-col md:flex-row gap-8 items-center transition-opacity ${req.status !== 'pending' ? 'opacity-50' : ''}`}>
               <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center text-rose-600 flex-shrink-0">

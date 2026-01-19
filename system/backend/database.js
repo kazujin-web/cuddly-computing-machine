@@ -280,7 +280,8 @@ export const initDatabase = () => {
             documentType TEXT,
             purpose TEXT,
             status TEXT,
-            dateRequested TEXT
+            dateRequested TEXT,
+            feedback TEXT
         )`);
 
         // Fee records table

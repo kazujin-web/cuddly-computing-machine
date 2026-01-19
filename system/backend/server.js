@@ -183,6 +183,10 @@ const INITIAL_USERS = [
   { id: 'u-tea1', name: 'Teacher Rose', email: 'teacher@gmail.com', role: 'TEACHER', assignedSections: ['Sampaguita', 'Narra'], password: '123' }
 ];
 const seedDatabase = () => {
+    db.run("ALTER TABLE document_requests ADD COLUMN feedback TEXT", (err) => {
+        if (err && !err.message.includes('duplicate column name')) console.error("Migration error (feedback):", err.message);
+    });
+
     db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
         if (err) return;
         if (row.count === 0) {
@@ -701,11 +705,49 @@ app.post('/api/doc-requests', (req, res) => {
     });
 });
 app.put('/api/doc-requests/:id', (req, res) => {
-    const { status } = req.body;
-    db.run('UPDATE document_requests SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
-        if (err) return res.status(500).json({ message: "Error" });
-        logActivity("Admin", "Registrar", `Updated Doc Request ${req.params.id}`, "Admissions");
-        res.json({ message: "Updated" });
+    const { status, feedback } = req.body;
+    const { id } = req.params;
+
+    db.get('SELECT * FROM document_requests WHERE id = ?', [id], (err, request) => {
+        if (err || !request) return res.status(404).json({ message: "Request not found" });
+
+        db.run('UPDATE document_requests SET status = ?, feedback = ? WHERE id = ?', [status, feedback || '', id], (err) => {
+            if (err) return res.status(500).json({ message: "Error" });
+            
+            logActivity("Admin", "Registrar", `Updated Doc Request ${id} to ${status}`, "Admissions");
+
+            // Notification Logic
+            if (status === 'ready' || status === 'rejected' || status === 'approved') {
+                db.get('SELECT * FROM users WHERE id = ?', [request.studentId], (err, user) => {
+                    if (user) {
+                        const subject = `Document Request Update: ${request.documentType}`;
+                        let message = `Your request for ${request.documentType} has been marked as: ${status.toUpperCase()}.`;
+                        
+                        if (status === 'ready') message += ' You may claim it at the Registrar Office.';
+                        if (feedback) message += `\n\nAdmin Remarks: "${feedback}"`;
+
+                        // 1. In-App Message
+                        const msgId = 'msg-' + Date.now();
+                        db.run('INSERT INTO messages (id, sender, recipientId, recipientGroup, subject, content, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                            [msgId, 'Registrar', user.id, 'Direct', subject, message, new Date().toLocaleString()],
+                            (err) => { if (err) console.error("Failed to send in-app msg:", err); }
+                        );
+
+                        // 2. Email
+                        if (process.env.EMAIL_USER && user.email) {
+                            transporter.sendMail({
+                                from: process.env.EMAIL_USER,
+                                to: user.email,
+                                subject: subject,
+                                text: message
+                            }, (err) => { if (err) console.error("Failed to send email:", err); });
+                        }
+                    }
+                });
+            }
+
+            res.json({ message: "Updated" });
+        });
     });
 });
 
