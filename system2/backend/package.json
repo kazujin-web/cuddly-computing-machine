@@ -1,0 +1,23 @@
+{
+  "name": "system2-backend",
+  "version": "1.0.0",
+  "description": "Backend for serving and editing SF9 reports",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "googleapis": "^171.4.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

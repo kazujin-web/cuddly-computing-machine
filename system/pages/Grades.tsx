@@ -276,7 +276,49 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
         <div className="flex justify-center">
             <div className="p-10 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 dark:bg-slate-800 text-center w-full max-w-4xl">
                 <p className="text-slate-400 font-bold mb-4">SF9 (Report Card)</p>
-                <img src="https://placehold.co/800x600?text=SF9+Report+Card" alt="SF9 Report Card" className="max-w-full h-auto rounded-xl shadow-lg mx-auto" />
+                <div className="flex flex-col items-center gap-4">
+                  <FileText size={48} className="text-slate-300" />
+                  <p className="text-sm text-slate-500 max-w-md mx-auto">
+                    Download your official SF9 Report Card in Excel format. This file is formatted for printing and offline viewing.
+                  </p>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const userData = {
+                          name: user.name,
+                          age: '10', // Placeholder or fetch from profile
+                          sex: 'MALE', // Placeholder or fetch from profile
+                          lrn: user.id || '123456789012',
+                          grade: 'FIVE', // Placeholder
+                          section: 'RIZAL' // Placeholder
+                        };
+                        
+                        const response = await fetch('/api/generate-excel', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userData, role: 'student' })
+                        });
+
+                        if (!response.ok) throw new Error('Generation failed');
+
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `SF9_${user.name.replace(/\s+/g, '_')}_student.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                      } catch (err) {
+                        console.error(err);
+                        alert("Failed to download SF9. Ensure System 2 backend is running.");
+                      }
+                    }}
+                    className="px-8 py-4 bg-emerald-600 text-white rounded-2xl flex items-center gap-3 text-sm font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all hover:-translate-y-1"
+                  >
+                    <Download size={20} /> Download SF9 (XLSX)
+                  </button>
+                </div>
             </div>
         </div>
       ) : (
