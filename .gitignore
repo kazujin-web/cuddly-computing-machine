@@ -1,0 +1,24 @@
+# Sensitive files
+credentials.json
+token.json
+*.p12
+*.pem
+.env
+.env.*
+!.env.example
+
+# Databases
+*.sqlite
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node
+node_modules/
+dist/
+.npm/

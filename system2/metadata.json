@@ -1,0 +1,7 @@
+{
+  "name": "Sto. Niño Portal - System 2",
+  "description": "Module for SF9 Report Card generation, Student ID creation, and Class Grading Sheet management with Excel integration.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
