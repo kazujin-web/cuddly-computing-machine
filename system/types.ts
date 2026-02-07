@@ -51,6 +51,7 @@ export interface User {
   emailVerified?: boolean;
   badges?: UserBadge[];
   birthDate?: string;
+  schoolYear?: string;
   academicHistory?: { year: string; grade: string; school: string }[];
   feedingProgramStatus?: 'Beneficiary' | 'None';
 }

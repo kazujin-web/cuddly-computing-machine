@@ -46,11 +46,13 @@ const runInserts = () => {
         { 
             id: 'u-admin', name: 'System Admin', email: 'admin@gmail.com', role: 'ADMIN', 
             password: '123', avatar: '', phone: '09170000000', address: 'Admin Office',
+            schoolYear: '2025-2026',
             academicHistory: '', requirements: ''
         },
         { 
             id: 'u-tea-default', name: 'Default Teacher', email: 'teacher@gmail.com', role: 'TEACHER', 
             password: '123', avatar: '', assignedSections: '["Sampaguita", "Narra"]', advisorySection: 'Narra', phone: '09171111111',
+            schoolYear: '2025-2026',
             academicHistory: '', requirements: ''
         },
         { 
@@ -60,6 +62,7 @@ const runInserts = () => {
             phone: '09172222222', address: 'Brgy. Santo Niño, Marikina City', 
             guardianName: 'Maria Dela Cruz', guardianPhone: '09173333333', psaStatus: 'Verified',
             feedingProgramStatus: 'None',
+            schoolYear: '2025-2026',
             academicHistory: JSON.stringify([{ year: '2023-2024', grade: 'Grade 3', school: 'Sto. Niño Elementary' }]),
             requirements: JSON.stringify({ 'SF9': true })
         }
@@ -100,6 +103,7 @@ const runInserts = () => {
             advisorySection: section ? section.name : '',
             phone: generatePhone(),
             address: 'Faculty Room',
+            schoolYear: '2025-2026',
             academicHistory: '',
             requirements: ''
         });
@@ -140,6 +144,7 @@ const runInserts = () => {
             guardianPhone: generatePhone(),
             psaStatus: 'Verified',
             feedingProgramStatus: Math.random() > 0.9 ? 'Beneficiary' : 'None',
+            schoolYear: '2025-2026',
             academicHistory: JSON.stringify([]),
             requirements: JSON.stringify({ 'SF9': true })
         });
@@ -151,9 +156,9 @@ const runInserts = () => {
     users.push(...students);
 
     // INSERT USERS
-    const insertUser = db.prepare('INSERT INTO users (id, name, email, role, password, avatar, assignedSections, advisorySection, lrn, gradeLevel, section, attendanceRate, gwa, honorStatus, is4Ps, phone, address, guardianName, guardianPhone, psaStatus, feedingProgramStatus, status, emailVerified, academicHistory, requirements) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const insertUser = db.prepare('INSERT INTO users (id, name, email, role, password, avatar, assignedSections, advisorySection, lrn, gradeLevel, section, attendanceRate, gwa, honorStatus, is4Ps, phone, address, guardianName, guardianPhone, psaStatus, feedingProgramStatus, status, emailVerified, schoolYear, academicHistory, requirements) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     users.forEach(u => {
-        insertUser.run(u.id, u.name, u.email, u.role, u.password, u.avatar || '', u.assignedSections || '[]', u.advisorySection || '', u.lrn || '', u.gradeLevel || '', u.section || '', u.attendanceRate || 0, u.gwa || 0, u.honorStatus || '', u.is4Ps ? 1 : 0, u.phone || '', u.address || '', u.guardianName || '', u.guardianPhone || '', u.psaStatus || '', u.feedingProgramStatus || '', 'active', 1, u.academicHistory || '[]', u.requirements || '{}');
+        insertUser.run(u.id, u.name, u.email, u.role, u.password, u.avatar || '', u.assignedSections || '[]', u.advisorySection || '', u.lrn || '', u.gradeLevel || '', u.section || '', u.attendanceRate || 0, u.gwa || 0, u.honorStatus || '', u.is4Ps ? 1 : 0, u.phone || '', u.address || '', u.guardianName || '', u.guardianPhone || '', u.psaStatus || '', u.feedingProgramStatus || '', 'active', 1, u.schoolYear || '', u.academicHistory || '[]', u.requirements || '{}');
     });
     insertUser.finalize();
     console.log(`Users seeded (${users.length}).`);

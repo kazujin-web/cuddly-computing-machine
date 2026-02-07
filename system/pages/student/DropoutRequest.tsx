@@ -48,7 +48,7 @@ const DropoutRequestPage: React.FC<{ user: User }> = ({ user }) => {
 
       <div>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Transfer-Out Form</h1>
-        <p className="text-slate-500 mt-2 font-medium">Official request for student withdrawal or transfer to another institution.</p>
+        <p className="text-slate-500 mt-2 font-medium">Official request for learner withdrawal or transfer to another institution.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">

@@ -123,7 +123,8 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700">
-      {/* Hero Section */}
+      {/* Hero Section - Hidden for Admin/Faculty */}
+      {!isAdminOrFaculty && (
       <div className={`relative p-12 lg:p-20 rounded-[4rem] overflow-hidden shadow-2xl border border-white/10 ${
         user.role === UserRole.STUDENT ? 'bg-gradient-to-br from-school-navy via-indigo-900 to-indigo-950 text-white' : 
         isAdminOrFaculty ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-black text-white' : 
@@ -141,7 +142,7 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
               </span>
             </div>
             <h1 className="text-5xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6">
-              {isAdminOrFaculty ? 'Identity Management' : `Mabuhay, ${user.name.split(' ')[0]}!`}
+              Identity Management
             </h1>
             <p className="text-xl font-medium opacity-80 leading-relaxed max-w-lg mb-10">
               {isAdminOrFaculty 
@@ -186,6 +187,7 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
           {isAdminOrFaculty ? <TrendingUp size={600} /> : <img src={LOGO_URL} className="w-[600px] grayscale brightness-200" alt="" />}
         </div>
       </div>
+      )}
 
       {/* Stats Section */}
       {isAdminOrFaculty && (
@@ -425,21 +427,10 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
                 )}
               </div>
               <div className="space-y-6">
-                 {events.map(ev => (
-                   <div key={ev.id} className="flex gap-6 items-center p-6 bg-white/5 dark:bg-slate-800/40 rounded-[2rem] group hover:translate-x-2 transition-all">
-                      <div className={`w-16 h-16 bg-white dark:bg-slate-900 border rounded-[1.5rem] flex flex-col items-center justify-center flex-shrink-0 shadow-lg ${
-                        ev.type === 'Holiday' ? 'text-rose-600 border-rose-100' : 
-                        ev.type === 'Brigada Eskwela' ? 'text-amber-600 border-amber-100' : 'text-indigo-600 border-indigo-100'
-                      }`}>
-                         <span className="text-[11px] font-black leading-none uppercase mb-1">{ev.month}</span>
-                         <span className="text-2xl font-black leading-none">{ev.day}</span>
-                      </div>
-                      <div>
-                         <p className="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-tight mb-1">{ev.title}</p>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{ev.type}</p>
-                      </div>
-                   </div>
-                 ))}
+                 {/* Placeholder for DepEd Calendar Image */}
+                 <div className="p-6 bg-white/5 dark:bg-slate-800/40 rounded-[2rem] border border-white/10 dark:border-slate-800 text-center">
+                    <img src="https://placehold.co/600x400?text=DepEd+Calendar+Image" alt="DepEd Calendar" className="max-w-full h-auto rounded-xl mx-auto opacity-80 hover:opacity-100 transition-opacity" />
+                 </div>
               </div>
            </section>
         </div>

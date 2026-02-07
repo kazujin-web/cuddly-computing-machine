@@ -167,10 +167,10 @@ const FacultyAnnouncements: React.FC<{ user: User }> = ({ user }) => {
           {isPoster && (
             <button 
               onClick={() => setIsAddingAnnouncement(true)}
-              className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
+              className="flex items-center justify-center w-12 h-12 bg-indigo-600 text-white rounded-full hover:scale-110 transition-transform shadow-xl"
+              title="Add New Post"
             >
-              <Plus size={20} />
-              New Post
+              <Plus size={24} />
             </button>
           )}
         </div>

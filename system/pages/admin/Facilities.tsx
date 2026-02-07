@@ -25,14 +25,25 @@ const AdminFacilities: React.FC = () => {
   const [editForm, setEditForm] = useState<Facility | null>(null);
   const [formError, setFormError] = useState('');
 
+  const [sectionOptions, setSectionOptions] = useState<string[]>([]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await api.getFacilities();
-      setFacilities(data);
+      const [facilitiesData, sectionsData] = await Promise.all([
+        api.getFacilities(),
+        api.getSections().catch(() => [])
+      ]);
+      setFacilities(facilitiesData);
+      
+      // Default facilities
+      const defaults = ['Computer Lab', 'Science Lab', 'Library', 'Clinic', 'Canteen', 'Covered Court'];
+      // Section-based rooms
+      const sectionRooms = sectionsData.map(s => `${s.gradeLevel} - ${s.name}`);
+      setSectionOptions([...defaults, ...sectionRooms]);
+      
     } catch (error) {
-      console.error("Failed to fetch facilities:", error);
-      // Optionally set an error state to display to the user
+      console.error("Failed to fetch data:", error);
     }
     setLoading(false);
   };
@@ -214,13 +225,17 @@ const AdminFacilities: React.FC = () => {
               <form onSubmit={handleCreateFacility} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Facility Name</label>
-                  <input 
-                    type="text" required
+                  <select 
                     className="w-full px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-indigo-600"
-                    placeholder="e.g., Science Lab, Grade 5 - Sampaguita"
                     value={createForm.name}
                     onChange={e => setCreateForm({...createForm, name: e.target.value})}
-                  />
+                    required
+                  >
+                    <option value="">Select Facility</option>
+                    {sectionOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Status</label>
@@ -287,13 +302,17 @@ const AdminFacilities: React.FC = () => {
               <form onSubmit={handleEditFacility} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Facility Name</label>
-                  <input 
-                    type="text" required
+                  <select 
                     className="w-full px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-indigo-600"
-                    placeholder="e.g., Science Lab, Grade 5 - Sampaguita"
                     value={editForm.name}
                     onChange={e => setEditForm({...editForm, name: e.target.value})}
-                  />
+                    required
+                  >
+                    <option value="">Select Facility</option>
+                    {sectionOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Status</label>

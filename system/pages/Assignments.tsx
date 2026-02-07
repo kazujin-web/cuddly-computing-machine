@@ -10,59 +10,84 @@ const AssignmentsPage: React.FC<{ user: User }> = ({ user }) => {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<{id: string, file: File} | null>(null);
   const [sortOption, setSortOption] = useState('due-earliest');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [filterOption, setFilterOption] = useState<'all' | 'assigned' | 'missing' | 'done'>('all');
+  
+  // Derived state
+  const isFaculty = user.role === UserRole.FACULTY || user.role === UserRole.TEACHER || user.role === UserRole.ADMIN;
 
   // Modal states
   const [isAddingAssignment, setIsAddingAssignment] = useState(false);
   const [isEditingAssignment, setIsEditingAssignment] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-
-  // Form states
-  const [createForm, setCreateForm] = useState({
-    title: '',
-    subject: '',
-    dueDate: '',
-    dueTime: '',
-    section: 'All',
-    allowedFileTypes: '',
-    resourceLink: ''
-  });
-  const [editForm, setEditForm] = useState<Assignment | null>(null);
   const [formError, setFormError] = useState('');
-  
-  // Sections for dropdown - simplified
-  const sections = ['Sampaguita', 'Narra', 'Molave', 'Acacia']; 
+  const [createForm, setCreateForm] = useState({ title: '', subject: '', dueDate: '', dueTime: '', section: 'All', allowedFileTypes: '', resourceLink: '' });
+  const [editForm, setEditForm] = useState<Assignment | null>(null);
+  const [sections, setSections] = useState<string[]>([]); // State for available sections
 
-  const isFaculty = user.role === UserRole.FACULTY || user.role === UserRole.TEACHER || user.role === UserRole.ADMIN;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch Sections for Modals
+  useEffect(() => {
+    if (isAddingAssignment || isEditingAssignment) { // Fetch sections only when modals are active
+      api.getSections().then(secs => {
+        setSections(secs.map((s: any) => s.name)); // Assuming API returns {id, name, ...}
+      }).catch(err => console.error("Failed to fetch sections:", err));
+    }
+  }, [isAddingAssignment, isEditingAssignment]);
 
   const fetchAssignmentsAndSubmissions = async () => {
-    setLoading(true);
     try {
-      const [assigns, subs] = await Promise.all([
-        api.getAssignments(), // Fetch all assignments
+      setLoading(true);
+      // Determine what to fetch based on user role
+      // If student, get assignments for their section (api might handle filtering or we filter)
+      // If teacher, get assignments for their managed sections
+      // The API currently returns ALL assignments if no section param, or filtered by section
+      
+      const [assData, subData] = await Promise.all([
+        api.getAssignments(user.role === 'STUDENT' ? user.section : undefined),
         api.getSubmissions()
       ]);
-      
-      // Filter for Student
-      let relevantAssignments = assigns;
-      if (user.role === UserRole.STUDENT) {
-          relevantAssignments = assigns.filter(a => 
-              !a.section || a.section === 'All' || a.section === user.section
-          );
-      }
-      
-      setAssignments(relevantAssignments);
-      setSubmissions(subs.filter(s => s.studentId === user.id));
+
+      setAssignments(assData);
+      setSubmissions(subData);
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      console.error("Failed to load assignments:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => { fetchAssignmentsAndSubmissions(); }, [user.id]);
+  useEffect(() => {
+    fetchAssignmentsAndSubmissions();
+  }, [user.section, user.role]);
 
   const getSortedAssignments = () => {
-    return [...assignments].sort((a, b) => {
+    let filtered = [...assignments];
+    
+    // Apply filters
+    if (filterOption !== 'all') {
+        filtered = filtered.filter(a => {
+            const status = getStatus(a.id);
+            const isLate = isSubmissionLate(a);
+            
+            if (filterOption === 'assigned') {
+                // Active, not late, not submitted/graded
+                return status === 'not-submitted' && !isLate && !a.isLocked;
+            }
+            if (filterOption === 'missing') {
+                // Late and not submitted
+                return status === 'not-submitted' && isLate;
+            }
+            if (filterOption === 'done') {
+                // Submitted or Graded
+                return status === 'pending' || status === 'graded';
+            }
+            return true;
+        });
+    }
+
+    return filtered.sort((a, b) => {
+      // ... (existing sort logic)
       const dateA = new Date(`${a.dueDate}T${a.dueTime || '23:59'}`).getTime();
       const dateB = new Date(`${b.dueDate}T${b.dueTime || '23:59'}`).getTime();
 
@@ -216,7 +241,22 @@ const AssignmentsPage: React.FC<{ user: User }> = ({ user }) => {
           <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Learning Deliverables</h1>
           <p className="text-slate-500 mt-2 font-medium">Upload your classroom requirements and track teacher validation.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl">
+             {['all', 'assigned', 'missing', 'done'].map(f => (
+                 <button 
+                    key={f}
+                    onClick={() => setFilterOption(f as any)}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        filterOption === f 
+                        ? 'bg-white dark:bg-slate-800 text-indigo-600 shadow-sm' 
+                        : 'text-slate-400'
+                    }`}
+                 >
+                    {f}
+                 </button>
+             ))}
+          </div>
           <select 
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}

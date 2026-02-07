@@ -173,7 +173,7 @@ const StudentSubmissions: React.FC<{ user: User }> = ({ user }) => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Academic Tasks</h1>
-          <p className="text-slate-500 mt-2 font-medium">Manage assignments and review student submissions.</p>
+          <p className="text-slate-500 mt-2 font-medium">Manage assignments and review learner submissions.</p>
         </div>
         <div className="flex bg-slate-100 dark:bg-slate-900 p-1.5 rounded-[2rem]">
            <button 

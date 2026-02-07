@@ -409,7 +409,7 @@ const UserManagement: React.FC = () => {
                     value={createForm.role}
                     onChange={e => setCreateForm({...createForm, role: e.target.value as UserRole})}
                   >
-                    <option value={UserRole.STUDENT}>Student</option>
+                    <option value={UserRole.STUDENT}>Learner</option>
                     <option value={UserRole.TEACHER}>Teacher</option>
                     <option value={UserRole.ADMIN}>Admin</option>
                   </select>

@@ -151,7 +151,7 @@ const Masterlist: React.FC<{ user: User }> = ({ user }) => {
           onClick={() => setActiveSection('All')}
           className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeSection === 'All' ? 'bg-white dark:bg-slate-800 text-indigo-600 shadow-sm' : 'text-slate-400'}`}
         >
-          All Students
+          All Learners
         </button>
         {assignedSections.map(sec => (
           <button 
@@ -169,7 +169,7 @@ const Masterlist: React.FC<{ user: User }> = ({ user }) => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Student Information</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Learner Information</th>
                 <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">LRN</th>
                 <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                 <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>

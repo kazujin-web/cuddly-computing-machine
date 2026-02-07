@@ -50,6 +50,7 @@ export const initDatabase = () => {
             guardianPhone TEXT,
             psaStatus TEXT,
             status TEXT DEFAULT 'active',
+            schoolYear TEXT,
             birthDate TEXT,
             feedingProgramStatus TEXT,
             emailVerified BOOLEAN DEFAULT 0,

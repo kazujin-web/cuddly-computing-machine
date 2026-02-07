@@ -119,7 +119,6 @@ const Sidebar: React.FC<{ user: User, isOpen: boolean, onClose: () => void, onLo
       { name: 'Clearance', path: '/clearance', icon: ShieldCheck },
       { name: 'Modules', path: '/modules', icon: BookOpen },
       { name: 'Assignments', path: '/assignments', icon: FolderCheck }, // Added Assignments here too as implicit
-      { name: 'Facilities', path: '/facilities', icon: Building2 }, // New Facility Link
       { name: 'Official Requests', path: '/requests', icon: FileText },
       { name: 'My ID', path: '/id-card', icon: QrCode },
       { name: 'Transfer-Out', path: '/transfer-out', icon: ShieldAlert },
@@ -132,7 +131,6 @@ const Sidebar: React.FC<{ user: User, isOpen: boolean, onClose: () => void, onLo
       { name: 'Modules', path: '/modules', icon: BookOpen },
       { name: 'Submissions', path: '/faculty/submissions', icon: FolderCheck },
       { name: 'Facilities', path: '/facilities', icon: Building2 }, // New Facility Link
-      { name: 'Broadcast', path: '/announcements', icon: Bell },
       { name: 'Email Alerts', path: '/faculty/email', icon: MessageSquare },
     ],
     [UserRole.FACULTY]: [],
@@ -145,11 +143,10 @@ const Sidebar: React.FC<{ user: User, isOpen: boolean, onClose: () => void, onLo
       { name: 'System Core', path: '/', icon: LayoutDashboard },
       { name: 'Inbox', path: '/inbox', icon: MessageSquare },
       { name: 'Admissions', path: '/faculty-requests', icon: ClipboardCheck },
-      { name: 'Registry', path: '/masterlist', icon: Users },
+      { name: 'Learner Registry', path: '/masterlist', icon: Users },
       { name: 'User Control', path: '/admin/users', icon: Users },
       { name: 'Database Forge', path: '/admin/database', icon: Database },
       { name: 'Facilities', path: '/admin/facilities', icon: Building2 },
-      { name: 'Broadcast', path: '/announcements', icon: Bell },
       { name: 'Email Alerts', path: '/faculty/email', icon: MessageSquare },
     ],
     [UserRole.PENDING]: []
@@ -359,7 +356,6 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
-            <AIAssistant user={user} />
           </div>
         )}
       </BrowserRouter>

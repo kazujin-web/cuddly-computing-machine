@@ -117,21 +117,7 @@ const ProfilePage: React.FC<{ user: User, onUpdateUser: (u: User) => void }> = (
                </div>
             </div>
             <div className="absolute bottom-6 right-12 flex gap-3">
-               <button 
-                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                disabled={loading}
-                className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105 ${isEditing ? 'bg-emerald-500 text-white' : 'bg-white text-slate-900'} disabled:opacity-50`}
-               >
-                 {loading ? <Loader2 size={16} className="animate-spin" /> : (isEditing ? <><Save size={16}/> Save Changes</> : <><Edit3 size={16}/> Edit Identity</>)}
-               </button>
-               {isEditing && (
-                 <button 
-                  onClick={() => { setIsEditing(false); setFormData({...user}); }}
-                  className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/20"
-                 >
-                   Cancel
-                 </button>
-               )}
+               {/* Edit button removed to make fields unchangeable */}
             </div>
          </div>
          

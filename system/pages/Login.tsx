@@ -97,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const roles = [
-    { id: UserRole.STUDENT, title: 'Students', desc: 'View grades & modules', icon: <GraduationCap size={32} />, color: 'from-indigo-600 to-blue-700' },
+    { id: UserRole.STUDENT, title: 'Learners', desc: 'View grades & modules', icon: <GraduationCap size={32} />, color: 'from-indigo-600 to-blue-700' },
     { id: UserRole.TEACHER, title: 'Teachers', desc: 'Manage sections & grading', icon: <Presentation size={32} />, color: 'from-rose-600 to-red-800' },
     // { id: UserRole.TRANSFEREE, title: 'Applicants', desc: 'New student registration', icon: <UserPlus size={32} />, color: 'from-emerald-600 to-teal-700' },
     { id: UserRole.ADMIN, title: 'Admin', desc: 'System setup & control', icon: <ShieldAlert size={32} />, color: 'from-slate-600 to-slate-800' }
@@ -236,7 +236,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                     <div className="space-y-2 md:space-y-3">
                       <div className="flex justify-between items-center px-3">
-                        <label className="block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/40">System Email or User ID</label>
+                        <label className="block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/40">Username</label>
                         <button 
                           type="button" 
                           onClick={() => setShowScanner(!showScanner)}
@@ -250,7 +250,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <input
                           type="text" required value={email} onChange={(e) => setEmail(e.target.value)}
                           className="w-full pl-16 pr-8 py-4 md:py-6 rounded-[2rem] bg-white/5 backdrop-blur-xl border-2 border-white/5 focus:border-school-gold outline-none font-bold text-sm md:text-base text-white shadow-xl transition-all"
-                          placeholder="Email or Scan ID Card"
+                          placeholder="Username"
                         />
                       </div>
                       {showScanner && (
@@ -272,7 +272,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                     <div className="space-y-2 md:space-y-3">
                       <div className="flex justify-between items-center px-3">
-                        <label className="block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/40">Security Key</label>
+                        <label className="block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/40">Password</label>
                         <Link to="/forgot-password" title="Recover Account" className="text-[11px] md:text-xs font-black uppercase text-school-gold tracking-widest opacity-60 hover:opacity-100">Forgot?</Link>
                       </div>
                       <div className="relative flex items-center">
