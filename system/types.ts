@@ -74,15 +74,6 @@ export interface ClearanceItem {
   remarks?: string;
 }
 
-export interface SchoolEvent {
-  id: string;
-  title: string;
-  date: string;
-  month: string;
-  day: string;
-  type: 'Holiday' | 'Academic' | 'Social' | 'Exam' | 'DepEd Event' | 'PTA Meeting' | 'Brigada Eskwela';
-}
-
 export interface ActivityLog {
   id: string;
   userId: string;

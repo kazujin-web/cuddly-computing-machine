@@ -5,7 +5,7 @@ const seed = async () => {
     console.log("Starting full database reset and seed...");
 
     const tables = [
-        'users', 'sections', 'clearance_items', 'school_events', 'activity_logs', 
+        'users', 'sections', 'clearance_items', 'activity_logs', 
         'submissions', 'announcements', 'grades', 'assignments', 'enrollment_applications', 
         'modules', 'schedule', 'attendance', 'dropout_requests', 'portfolio_projects', 
         'sms_logs', 'email_logs', 'library_resources', 'facilities', 'health_records', 

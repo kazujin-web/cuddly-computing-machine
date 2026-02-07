@@ -3,7 +3,7 @@ import {
   User, UserRole, Announcement, Grade, 
   Module, Assignment, EnrollmentApplication, ScheduleItem, 
   Submission, AttendanceRecord,
-  SchoolEvent, ActivityLog, ClearanceItem, DropoutRequest, Section,
+  ActivityLog, ClearanceItem, DropoutRequest, Section,
   SMSLog, LibraryResource, Facility, HealthRecord, DocumentRequest, LockoutInfo,
   FeeRecord
 } from './types';
@@ -83,7 +83,6 @@ const TABLES = {
   ASSIGNMENTS: 'assignments',
   SUBMISSIONS: 'submissions',
   ATTENDANCE: 'attendance',
-  EVENTS: 'events',
   LOGS: 'activity_logs',
   CLEARANCE: 'clearance',
   DROPOUTS: 'dropouts',
@@ -203,14 +202,6 @@ export const api = {
     return studentId ? all.filter(g => g.studentId === studentId) : all;
   },
   getAnnouncements: async (): Promise<Announcement[]> => db.query(TABLES.ANNOUNCEMENTS),
-  getEvents: async (): Promise<SchoolEvent[]> => {
-    const evs = db.query<SchoolEvent>(TABLES.EVENTS);
-    if (evs.length === 0) {
-      db.insert(TABLES.EVENTS, { id: 'ev1', title: 'Brigada Eskwela 2024', date: '2024-05-20', month: 'MAY', day: '20', type: 'Brigada Eskwela' });
-      return db.query(TABLES.EVENTS);
-    }
-    return evs;
-  },
   getUsers: async (): Promise<User[]> => db.query(TABLES.USERS),
   getSMSLogs: async (): Promise<SMSLog[]> => db.query(TABLES.SMS),
   
@@ -258,10 +249,6 @@ export const api = {
 
   updateGrade: async (id: string, update: Partial<Grade>, facultyName: string): Promise<void> => {
     db.update(TABLES.GRADES, id, update);
-  },
-
-  postEvent: async (ev: Omit<SchoolEvent, 'id'>, userName: string): Promise<void> => {
-    db.insert(TABLES.EVENTS, { ...ev, id: 'ev-' + Date.now() });
   },
 
   updateUser: async (id: string, update: Partial<User>): Promise<void> => {

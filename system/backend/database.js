@@ -81,16 +81,6 @@ export const initDatabase = () => {
             remarks TEXT
         )`);
 
-        // School events table
-        db.run(`CREATE TABLE IF NOT EXISTS school_events (
-            id TEXT PRIMARY KEY,
-            title TEXT,
-            date TEXT,
-            month TEXT,
-            day TEXT,
-            type TEXT
-        )`);
-
         // Activity logs table
         db.run(`CREATE TABLE IF NOT EXISTS activity_logs (
             id TEXT PRIMARY KEY,

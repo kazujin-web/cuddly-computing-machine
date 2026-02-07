@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { User, Announcement, UserRole, SchoolEvent, ActivityLog } from '../types';
+import { User, Announcement, UserRole, ActivityLog } from '../types';
 import { api } from '../src/api';
 import { 
-  Bell, Calendar, Clock, Star, 
+  Bell, Clock, Star, 
   GraduationCap, 
   Users, ClipboardCheck, ShieldCheck, QrCode, Plus, X,
   Database, ShieldAlert, Heart, TrendingUp,
-  CalendarPlus, History, Terminal, CheckCircle, Sparkles,
+  History, Terminal, CheckCircle, Sparkles,
   BarChart3, PieChart as PieChartIcon, Activity as ActivityIcon, ArrowUpRight
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,11 +20,8 @@ const CHART_COLORS = ['#1A237E', '#00A36C', '#EAB308', '#E11D48', '#6366F1', '#8
 
 const Dashboard: React.FC<{ user: User }> = ({ user }) => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [events, setEvents] = useState<SchoolEvent[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
-  const [eventForm, setEventForm] = useState({ title: '', date: '', type: 'Academic' as SchoolEvent['type'] });
   const [stats, setStats] = useState({ 
     totalUsers: 0, 
     pendingApps: 0, 
@@ -38,11 +35,10 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
   const navigate = useNavigate();
 
   const load = async () => {
-    const [anns, allUsers, apps, evs, activityLogs] = await Promise.all([
+    const [anns, allUsers, apps, activityLogs] = await Promise.all([
       api.getAnnouncements(),
       api.getUsers(),
       api.getEnrollmentApplications(),
-      api.getEvents(),
       api.getLogs()
     ]);
     
@@ -75,7 +71,6 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
     const activityData = Object.entries(catCounts).map(([name, value]) => ({ name, value }));
 
     setAnnouncements(anns);
-    setEvents(evs);
     setLogs(activityLogs.slice(0, 3)); 
     setStats({
       totalUsers: allUsers.length,
@@ -93,18 +88,6 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
   useEffect(() => {
     load();
   }, [user.id]);
-
-  const handleAddEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!eventForm.title || !eventForm.date) return;
-    const dateObj = new Date(eventForm.date);
-    const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
-    const day = dateObj.getDate().toString().padStart(2, '0');
-    await api.postEvent({ title: eventForm.title, date: eventForm.date, month, day, type: eventForm.type });
-    setIsEventModalOpen(false);
-    setEventForm({ title: '', date: '', type: 'Academic' });
-    load();
-  };
 
   if (loading) return (
     <div className="h-[60vh] flex items-center justify-center">
@@ -413,80 +396,8 @@ const Dashboard: React.FC<{ user: User }> = ({ user }) => {
         </div>
 
         <div className="space-y-10">
-           {/* DepEd Calendar */}
-           <section className="glass rounded-[4rem] p-12 shadow-xl border-slate-200 dark:border-slate-800">
-              <div className="flex justify-between items-center mb-10">
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-4 uppercase tracking-tighter">
-                  <Calendar size={28} className="text-rose-500" />
-                  DepEd Calendar
-                </h3>
-                {isAdminOrFaculty && (
-                  <button onClick={() => setIsEventModalOpen(true)} className="p-3 bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-[1.25rem] hover:scale-110 transition-transform">
-                    <CalendarPlus size={24} />
-                  </button>
-                )}
-              </div>
-              <div className="space-y-6">
-                 {/* Placeholder for DepEd Calendar Image */}
-                 <div className="p-6 bg-white/5 dark:bg-slate-800/40 rounded-[2rem] border border-white/10 dark:border-slate-800 text-center">
-                    <img src="https://placehold.co/600x400?text=DepEd+Calendar+Image" alt="DepEd Calendar" className="max-w-full h-auto rounded-xl mx-auto opacity-80 hover:opacity-100 transition-opacity" />
-                 </div>
-              </div>
-           </section>
         </div>
       </div>
-
-      {/* Add Event Modal */}
-      {isEventModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md">
-           <div className="glass w-full max-w-lg rounded-[4rem] p-12 shadow-2xl animate-in zoom-in-95 duration-300">
-              <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-3xl font-black uppercase tracking-tighter">New Calendar Entry</h3>
-                 <button onClick={() => setIsEventModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={28}/></button>
-              </div>
-              <form onSubmit={handleAddEvent} className="space-y-8">
-                 <div className="space-y-3">
-                   <label className="block text-[11px] font-black uppercase text-slate-400 tracking-widest ml-3">Event Identity</label>
-                   <input 
-                    type="text" required
-                    className="w-full px-8 py-6 bg-slate-100/50 dark:bg-slate-900 rounded-[2rem] outline-none font-bold text-base border-2 border-transparent focus:border-school-accent"
-                    placeholder="e.g. Buwan ng Wika Celebration"
-                    value={eventForm.title}
-                    onChange={e => setEventForm({...eventForm, title: e.target.value})}
-                   />
-                 </div>
-                 <div className="space-y-3">
-                   <label className="block text-[11px] font-black uppercase text-slate-400 tracking-widest ml-3">Scheduled Date</label>
-                   <input 
-                    type="date" required
-                    className="w-full px-8 py-6 bg-slate-100/50 dark:bg-slate-900 rounded-[2rem] outline-none font-bold text-base border-2 border-transparent focus:border-school-accent"
-                    value={eventForm.date}
-                    onChange={e => setEventForm({...eventForm, date: e.target.value})}
-                   />
-                 </div>
-                 <div className="space-y-3">
-                   <label className="block text-[11px] font-black uppercase text-slate-400 tracking-widest ml-3">Categorization</label>
-                   <select 
-                    className="w-full px-8 py-6 bg-slate-100/50 dark:bg-slate-900 rounded-[2rem] outline-none font-bold text-base border-2 border-transparent focus:border-school-accent"
-                    value={eventForm.type}
-                    onChange={e => setEventForm({...eventForm, type: e.target.value as any})}
-                   >
-                     <option value="Academic">Academic</option>
-                     <option value="Holiday">Holiday</option>
-                     <option value="Social">Social</option>
-                     <option value="Exam">Exam</option>
-                     <option value="DepEd Event">DepEd Event</option>
-                     <option value="PTA Meeting">PTA Meeting</option>
-                     <option value="Brigada Eskwela">Brigada Eskwela</option>
-                   </select>
-                 </div>
-                 <button type="submit" className="w-full py-6 bg-school-accent text-white font-black rounded-[2rem] uppercase tracking-widest text-xs shadow-2xl hover:scale-105 transition-transform active:scale-95">
-                   Publish Event to Registry
-                 </button>
-              </form>
-           </div>
-        </div>
-      )}
     </div>
   );
 };

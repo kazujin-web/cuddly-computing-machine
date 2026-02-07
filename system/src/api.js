@@ -86,13 +86,6 @@ export const api = {
         method: 'DELETE',
     }),
 
-    // Events API
-    getEvents: () => fetchData('/events'),
-    postEvent: (eventData) => fetchData('/events', {
-        method: 'POST',
-        body: JSON.stringify(eventData),
-    }),
-
     // Grades API
     getGrades: (studentId = '') => fetchData(`/grades${studentId ? `?studentId=${studentId}` : ''}`),
     createGrade: (gradeData) => fetchData('/grades', {

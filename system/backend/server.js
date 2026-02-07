@@ -285,23 +285,6 @@ app.delete('/api/announcements/:id', (req, res) => {
     });
 });
 
-// EVENTS API
-app.get('/api/events', (req, res) => {
-    db.all('SELECT * FROM school_events', [], (err, rows) => {
-        if (err) return res.status(500).json({ message: "Error" });
-        res.json(rows);
-    });
-});
-app.post('/api/events', (req, res) => {
-    const { title, date, month, day, type } = req.body;
-    const id = 'ev-' + Date.now();
-    db.run('INSERT INTO school_events (id, title, date, month, day, type) VALUES (?, ?, ?, ?, ?, ?)', [id, title, date, month, day, type], function(err) {
-        if (err) return res.status(500).json({ message: "Error" });
-        logActivity("Admin", "Admin", `Posted Event: ${title}`, "Calendar");
-        res.status(201).json({ id, title, date, month, day, type });
-    });
-});
-
 // MESSAGES API
 app.get('/api/messages', (req, res) => {
     const { userId } = req.query;
