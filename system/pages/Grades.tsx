@@ -301,6 +301,9 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
               </button>
             </>
           )}
+          <button className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-100 rounded-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest shadow-sm">
+             <Printer size={16} /> Print Card
+          </button>
         </div>
       </div>
 
@@ -366,11 +369,134 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
             </div>
         </div>
       ) : (
-        <div className="flex justify-center">
-            <div className="p-10 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 dark:bg-slate-800 text-center w-full max-w-4xl">
-                <p className="text-slate-400 font-bold mb-4">Class Grading Sheet</p>
-                <img src="https://placehold.co/1000x600?text=Grading+Sheet+Image+Placeholder" alt="Grading Sheet" className="max-w-full h-auto rounded-xl shadow-lg mx-auto" />
-            </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] shadow-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject Areas</th>
+                  <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">1st</th>
+                  <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">2nd</th>
+                  <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">3rd</th>
+                  <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">4th</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Final</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Remarks</th>
+                  {isFaculty && <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {grades.map(grade => {
+                  const isEditing = editingId === grade.id;
+                  return (
+                    <tr key={grade.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
+                      <td className="px-8 py-8">
+                         <p className="font-black text-slate-800 dark:text-slate-100 text-lg leading-none">
+                           {isEditing ? (
+                             <input 
+                               type="text" className="w-full p-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-black text-sm"
+                               value={tempData.subject ?? grade.subject}
+                               onChange={e => setTempData({...tempData, subject: e.target.value})}
+                             />
+                           ) : grade.subject}
+                         </p>
+                         <p className="text-[10px] text-slate-400 font-bold uppercase mt-2">{isFaculty ? grade.studentName : 'Core Academic'}</p>
+                      </td>
+                      {[1, 2, 3, 4].map(q => {
+                        const field = `q${q}` as keyof Grade;
+                        const val = isEditing ? (tempData[field] ?? (grade[field] as number)) : (grade[field] as number);
+                        return (
+                          <td key={q} className="px-6 py-8">
+                            {isEditing ? (
+                              <input 
+                                type="number" className="w-16 p-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-black text-center"
+                                value={val === 0 ? '' : val}
+                                onChange={e => setTempData({...tempData, [field]: parseInt(e.target.value) || 0})}
+                              />
+                            ) : (
+                              <span className={`font-black text-xl ${val === 0 ? 'text-slate-200' : 'text-slate-600'}`}>{val || '-'}</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                      <td className="px-8 py-8">
+                         <div className="flex items-center gap-4">
+                           <span className="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-black text-sm">{grade.finalAverage || '-'}</span>
+                         </div>
+                      </td>
+                      <td className="px-8 py-8 text-right">
+                         <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase border-2 ${
+                           grade.remarks === 'Passed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+                         }`}>
+                           {grade.remarks}
+                         </span>
+                      </td>
+                      {isFaculty && (
+                        <td className="px-8 py-8 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => isEditing ? handleUpdateGrade(grade.id) : (setEditingId(grade.id), setTempData({}))}
+                              className={`p-3 rounded-2xl ${isEditing ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}
+                              title={isEditing ? "Save Changes" : "Edit Grade"}
+                            >
+                              {isEditing ? <Save size={18}/> : <Edit size={18}/>}
+                            </button>
+                                                      {!isEditing && (
+                                                        <>
+                                                          <button 
+                                                            onClick={async () => {
+                                                              try {
+                                                                const userData = {
+                                                                  name: grade.studentName,
+                                                                  age: '10', // Placeholder
+                                                                  sex: 'MALE', // Placeholder
+                                                                  lrn: grade.studentId || '123456789012',
+                                                                  grade: 'FIVE', // Placeholder
+                                                                  section: 'RIZAL' // Placeholder
+                                                                };
+                                                                
+                                                                const response = await fetch('/api/generate-excel', {
+                                                                  method: 'POST',
+                                                                  headers: { 'Content-Type': 'application/json' },
+                                                                  body: JSON.stringify({ userData, role: 'teacher' })
+                                                                });
+                            
+                                                                if (!response.ok) throw new Error('Generation failed');
+                            
+                                                                const blob = await response.blob();
+                                                                const url = window.URL.createObjectURL(blob);
+                                                                const a = document.createElement('a');
+                                                                a.href = url;
+                                                                a.download = `SF9_${grade.studentName.replace(/\s+/g, '_')}.xlsx`;
+                                                                document.body.appendChild(a);
+                                                                a.click();
+                                                                a.remove();
+                                                              } catch (err) {
+                                                                console.error(err);
+                                                                alert("Failed to download SF9. Ensure System 2 backend is running.");
+                                                              }
+                                                            }}
+                                                            className="p-3 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-2xl transition-all"
+                                                            title="Download SF9 (XLSX)"
+                                                          >
+                                                            <Download size={18} />
+                                                          </button>
+                                                          <button 
+                                                            onClick={() => handleDeleteGrade(grade.id)}
+                                                            className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
+                                                            title="Delete Grade"
+                                                          >
+                                                            <Trash2 size={18} />
+                                                          </button>
+                                                        </>
+                                                      )}                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -442,15 +568,16 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
               )}
               
               <form onSubmit={handleCreateGrade} className="space-y-6">
-                              <div>
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Learner</label>
-                                <select 
-                                  className="w-full px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-indigo-600"
-                                  value={createForm.studentId}
-                                  onChange={e => setCreateForm({...createForm, studentId: e.target.value})}
-                                  required
-                                >
-                                  <option value="">Select Learner</option>                    {students.map(student => (
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Learner</label>
+                  <select 
+                    className="w-full px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-indigo-600"
+                    value={createForm.studentId}
+                    onChange={e => setCreateForm({...createForm, studentId: e.target.value})}
+                    required
+                  >
+                    <option value="">Select Learner</option>
+                    {students.map(student => (
                       <option key={student.id} value={student.id}>{student.name}</option>
                     ))}
                   </select>
