@@ -9,6 +9,18 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         proxy: {
+          '/id-system': {
+            target: 'http://localhost:5002',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/id-system/, '')
+          },
+          '/api/system1': {
+            target: 'http://localhost:5002',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/api\/system1/, '/api')
+          },
           '/api/preview-sf9-page': {
             target: 'http://localhost:5001',
             changeOrigin: true,
