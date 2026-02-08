@@ -9,7 +9,17 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         proxy: {
+          '/api/preview-sf9-page': {
+            target: 'http://localhost:5001',
+            changeOrigin: true,
+            secure: false,
+          },
           '/api/generate-excel': {
+            target: 'http://localhost:5001',
+            changeOrigin: true,
+            secure: false,
+          },
+          '/resources': {
             target: 'http://localhost:5001',
             changeOrigin: true,
             secure: false,

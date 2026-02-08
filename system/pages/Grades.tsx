@@ -38,6 +38,42 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
   });
   const [formError, setFormError] = useState('');
 
+  // Preview State
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [activePage, setActivePage] = useState(1);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const fetchPreview = async (page: number) => {
+      setActivePage(page);
+      setPreviewLoading(true);
+      try {
+          const userData = {
+            name: user.name,
+            age: '10', // Placeholder
+            sex: 'MALE', // Placeholder
+            lrn: user.id || '123456789012',
+            grade: 'FIVE', // Placeholder
+            section: 'RIZAL' // Placeholder
+          };
+
+          const response = await fetch(`/api/preview-sf9-page/${page}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userData })
+          });
+          
+          if (!response.ok) throw new Error("Failed to load preview");
+          const html = await response.text();
+          setPreviewHtml(html);
+      } catch (e) {
+          console.error(e);
+          setPreviewHtml('<div style="display:flex;justify-content:center;align-items:center;height:100%;color:red;font-weight:bold;">Failed to load preview. System 2 backend might be down.</div>');
+      } finally {
+          setPreviewLoading(false);
+      }
+  };
+
   const isFaculty = user.role === UserRole.FACULTY || user.role === UserRole.TEACHER || user.role === UserRole.ADMIN;
 
   const load = async () => {
@@ -265,9 +301,6 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
               </button>
             </>
           )}
-          <button className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-100 rounded-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest shadow-sm">
-             <Printer size={16} /> Print Card
-          </button>
         </div>
       </div>
 
@@ -318,6 +351,17 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
                   >
                     <Download size={20} /> Download SF9 (XLSX)
                   </button>
+
+                  <button 
+                    onClick={() => {
+                        setIsPreviewing(true);
+                        // Initial Load
+                        fetchPreview(1);
+                    }}
+                    className="px-8 py-4 bg-indigo-600 text-white rounded-2xl flex items-center gap-3 text-sm font-black uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all hover:-translate-y-1"
+                  >
+                    <FileText size={20} /> Preview SF9
+                  </button>
                 </div>
             </div>
         </div>
@@ -326,6 +370,53 @@ const GradesPage: React.FC<{ user: User }> = ({ user }) => {
             <div className="p-10 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 dark:bg-slate-800 text-center w-full max-w-4xl">
                 <p className="text-slate-400 font-bold mb-4">Class Grading Sheet</p>
                 <img src="https://placehold.co/1000x600?text=Grading+Sheet+Image+Placeholder" alt="Grading Sheet" className="max-w-full h-auto rounded-xl shadow-lg mx-auto" />
+            </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {isPreviewing && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-5xl h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                    <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                        <FileText className="text-indigo-600" /> 
+                        SF9 Preview
+                    </h3>
+                    <div className="flex gap-4">
+                        <div className="flex bg-slate-200 dark:bg-slate-800 rounded-xl p-1">
+                            <button 
+                                onClick={() => fetchPreview(1)}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activePage === 1 ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Front Page
+                            </button>
+                            <button 
+                                onClick={() => fetchPreview(2)}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activePage === 2 ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Inside Page
+                            </button>
+                        </div>
+                        <button onClick={() => setIsPreviewing(false)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"><X/></button>
+                    </div>
+                </div>
+                
+                <div className="flex-1 bg-slate-200/50 dark:bg-black/20 overflow-auto p-8 flex justify-center">
+                    {previewLoading ? (
+                        <div className="flex items-center justify-center h-full">
+                            <Loader2 className="animate-spin text-indigo-600" size={48} />
+                        </div>
+                    ) : (
+                        <div className="bg-white shadow-xl animate-in fade-in zoom-in-95 duration-300 origin-top" style={{ width: '8.5in', minHeight: '11in' }}>
+                            <iframe 
+                                srcDoc={previewHtml} 
+                                className="w-full h-full min-h-[11in] border-none" 
+                                title="SF9 Preview"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
       )}
